@@ -5,18 +5,19 @@ from CSVReader import CSVReader
 class CarsDataCleanerHelper:
     """
     helper class to get to know the data, especially the columns of 'make' and 'color'
+    write to destined file the cleaned data
     """
 
-    def __init__(self, file_name):
-        reader = CSVReader(file_name)
-        self.colors = {}
-        self.makers_file = open('C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record_edited_makers.csv', newline='', mode='w', encoding='UTF-8')
-        self.writer = csv.writer(self.makers_file)
+    def __init__(self, src, dest):
+        reader = CSVReader(src)
+        self.cleaned_file = open(dest, newline='', mode='w', encoding='UTF-8')
+        self.writer = csv.writer(self.cleaned_file)
         self.gen = reader.read_chunks()
         # in order to write the headers, we must do this
         chunk = next(self.gen)
         self.writer.writerow(chunk.columns)
         self.clean_chunk(chunk)
+        self.colors = {}
         # number_of_rows = 1  # 49019679
 
     def clean(self):
@@ -24,30 +25,35 @@ class CarsDataCleanerHelper:
             try:
                 chunk = next(self.gen)
                 self.clean_chunk(chunk)
-                # make = row.split(',')[8]
-                # parsed_make = self.parse(make)
-                # parsed_row = row.replace(make, parsed_make)
-                # self.write_row(parsed_row.strip())
             except UnicodeDecodeError:
                 print('error - bad line')
             except StopIteration:
                 break
-        self.makers_file.close()
-        print(self.colors)
+        self.cleaned_file.close()
 
-    def clean_chunk(self, chunk):
+    def build_colors_appearances(self, chunk):
         for row in chunk.values:
-            make_cleaned = self.clean_make(row[8])
-            row[8] = make_cleaned
-            self.writer.writerow(row)
             color = row[10]
             if color in self.colors.keys():
                 self.colors[color] = self.colors[color] + 1
             else:
                 self.colors[color] = 1
+        print('parsed colors of chunk')
+
+    def clean_chunk(self, chunk):
+        """
+        goes line by line in the chunk, updates the make and writes the new line in the destined file
+        """
+        for row in chunk.values:
+            make_cleaned = self.clean_make(row[8])
+            row[8] = make_cleaned
+            self.writer.writerow(row)
         print('cleaned chunk')
 
+    # remove '-' and ',' from names, leave only one space
     # mercedes to mercedes-benz
+    # chrysler jeep to jeep
+    # smart (mcc) to smart
     def clean_make(self, make):
         try:
             parsed = make.lower()   # no maker (nan)
@@ -56,8 +62,13 @@ class CarsDataCleanerHelper:
         parsed = parsed.replace('-', ' ')   # put space instead of '-'
         parsed = parsed.replace(',', ' ')   # put space instead of '-'
         parsed = ' '.join(parsed.split())   # replace multiple spaces by one
+
         if parsed.__eq__('mercedes'):
             return 'mercedes benz'
+        elif parsed.__eq__('chrysler jeep'):
+            return 'jeep'
+        elif parsed.__eq__('smart (mcc)'):
+            return 'smart'
         return parsed
 
     # def write_to_file(self, file_name, dict_to_print):
