@@ -63,7 +63,7 @@ class CarsDataCleanerHelper:
         parsed = parsed.replace(',', ' ')   # put space instead of '-'
         parsed = ' '.join(parsed.split())   # replace multiple spaces by one
 
-        if parsed.__eq__('mercedes'):
+        if 'mercedes' in parsed:
             return 'mercedes benz'
         elif parsed.__eq__('chrysler jeep'):
             return 'jeep'
