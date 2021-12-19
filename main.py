@@ -12,7 +12,7 @@ if __name__ == '__main__':
     # helper = CarsDataCleanerHelper('C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record.csv', 'C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record_edited_makers.csv')
     # helper.clean()
 
-    cleaner = CarsDataCleaner(prefix + 'cars_last_record.csv', prefix + 'irrelevant_makers_deleted.csv', prefix + 'edited_sorted_makers.csv')
+    cleaner = CarsDataCleaner(prefix + 'cars_last_record.csv', prefix + 'cars_last_record_test_class_4.csv', prefix + 'edited_sorted_makers.csv')
     cleaner.clean()
 
     #write_makers = WriteColumnWithAppearancesToFile('C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record.csv', 'C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cylinder_capacities.csv', 12)

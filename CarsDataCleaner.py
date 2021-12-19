@@ -50,16 +50,21 @@ class CarsDataCleaner:
         goes line by line in the chunk, adds a column with the cleaned make and writes the new line in the destined file
         """
         # clean_chunk = pd.DataFrame(columns=self.headers)
-        try:
-            for row in chunk.values:
+        for row in chunk.values:
+            try:
                 make = row[8]
-                if make not in self.makers_to_delete:   # only if it's a private car - clean and write new result
-                    make_cleaned = self.clean_make(make)
-                    row = np.insert(row, 9, make_cleaned)
-                    self.writer.writerow(row)
+                test_class_id = row[3]
+                if test_class_id == 4: # only if it's a private car
+                      #  and make not in self.makers_to_delete:   # only if it's a private car - clean and write new result
+                    try:
+                        make_cleaned = self.clean_make(make)
+                        row = np.insert(row, 9, make_cleaned)
+                        self.writer.writerow(row)
+                    except Exception:
+                        print('error1 ' , row)
                     # clean_chunk = self.add_nd_array_to_data_frame(clean_chunk, row)
-        except Exception:
-            print('error')
+            except Exception:
+                print('error2 ' , row)
         # clean_chunk.to_csv(self.dest, encoding='utf-8', index=False)
         print('wrote clean chunk')
 
