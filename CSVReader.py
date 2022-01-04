@@ -21,6 +21,6 @@ class CSVReader:
         """
         reads the csv in chunks with pandas
         """
-        df = pd.read_csv(self.file_name, encoding='UTF-8', chunksize=1000000)
+        df = pd.read_csv(self.file_name, encoding='UTF-8', chunksize=10000000)
         for chunk in df:
             yield chunk

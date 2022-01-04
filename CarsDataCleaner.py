@@ -3,6 +3,7 @@ import csv
 import numpy as np
 import pandas as pd
 
+from BuildMakeModelMap import BuildMakeModelMap
 from CSVReader import CSVReader
 
 class CarsDataCleaner:
@@ -13,12 +14,9 @@ class CarsDataCleaner:
     """
     def __init__(self, src, dest, makers_file):
         self.dest = dest
-        #self.main_makers = self.build_main_makers(makers_file, 10000)     # the makers that appear more than 10000 times
-        # manufacturers of motorcycles, motorhomes, racing cars, taxis etc. that can be deleted
-        self.makers_to_delete = ['kawasaki', 'triumph', 'piaggio', 'harley davidson', 'aprilia', 'ducati', 'lambretta', 'gilera', 'ktm', 'lotus', 'bsa', 'sym', 'tvr', 'moto guzzi', 'kymco', 'norton', 'royal enfield', 'vespa (douglas)', 'abarth', 'leyland daf', 'caterham', 'derbi', 'hyosung', 'buell', 'velocette', 'westfield', 'westfield', 'mz', 'cagiva', 'baotian', 'matchless', 'mbk', 'lexmoto', 'ccm', 'ariel', 'husqvarna', 'vespa', 'tgb', 'smc', 'metrocab', 'italjet', 'auto trail', 'mv agusta', 'jinlun', 'benelli', 'gas gas', 'malaguti', 'lifan']
-
-        #print(sorted(self.main_makers))
-
+        self.main_makers = self.build_main_makers(makers_file, 2000)     # the makers that appear more than 2000 times
+        make_model_map_builder = BuildMakeModelMap('C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\mini.csv', 9, 10)
+        make_model_map_builder.build_main_models(10)
         reader = CSVReader(src)
         self.gen = reader.read_chunks()
 
@@ -31,6 +29,7 @@ class CarsDataCleaner:
         chunk = next(self.gen)
         self.headers = chunk.columns
         self.headers = np.insert(self.headers, 9, 'clean make')   # index of clean make is 9
+        self.headers = np.insert(self.headers, 11, 'clean model')   # index of clean model is 11
         self.writer.writerow(self.headers)
         self.clean_chunk(chunk)
 
@@ -53,12 +52,14 @@ class CarsDataCleaner:
         for row in chunk.values:
             try:
                 make = row[8]
+                model = row[9]
                 test_class_id = row[3]
                 if test_class_id == 4: # only if it's a private car
-                      #  and make not in self.makers_to_delete:   # only if it's a private car - clean and write new result
                     try:
                         make_cleaned = self.clean_make(make)
                         row = np.insert(row, 9, make_cleaned)
+                        model_cleaned = self.clean_model(model)
+                        row = np.insert(row, 11, model_cleaned)
                         self.writer.writerow(row)
                     except Exception:
                         print('error1 ' , row)
@@ -75,7 +76,7 @@ class CarsDataCleaner:
         df = df.append(data_to_append, ignore_index=True)
         return df
 
-    def clean_make_symbols(self, make):
+    def clean_symbols(self, make):
         """
         changes the make to be lower cased and cleans the symbols of the make - removes '-' ',' and spaces
         returns the clean make
@@ -84,10 +85,18 @@ class CarsDataCleaner:
             parsed = make.lower()
         except AttributeError:  # no maker (nan)
             return make
-        parsed = parsed.replace('-', ' ')   # put space instead of '-'
-        parsed = parsed.replace(',', ' ')   # put space instead of '-'
+        parsed = parsed.replace('-', ' ')
+        parsed = parsed.replace(',', ' ')
+        parsed = parsed.replace(';', ' ')
+        parsed = parsed.replace('/', ' ')
+        parsed = parsed.replace('\\', ' ')
         parsed = ' '.join(parsed.split())   # replace multiple spaces by one
         return parsed
+
+
+    def clean_model(self, model):
+        model_clean_symbols = self.clean_symbols(model)
+        return model_clean_symbols
 
 
     def clean_make(self, make):
@@ -95,19 +104,30 @@ class CarsDataCleaner:
         check if the make is too detailed and return the "short" name of the make
         e.g honda civic is too detailed, it will be returned as honda
         """
-        make_clean_symbols = self.clean_make_symbols(make)
-        if 'mercedes' in make_clean_symbols:
-            return 'mercedes benz'
-        elif make_clean_symbols.__eq__('chrysler jeep'):
-            return 'jeep'
-        elif make_clean_symbols.__eq__('smart (mcc)'):
-            return 'smart'
-        # try:
-        #     for main_make in self.main_makers:
-        #         if main_make in make_clean_symbols:
-        #             return main_make
-        # except Exception:
-        #     return make_clean_symbols
+        try:
+            make_clean_symbols = self.clean_symbols(make)
+            if 'mercedes' in make_clean_symbols or 'mcc' in make_clean_symbols:
+                return 'mercedes benz'
+            elif make_clean_symbols.__eq__('chrysler jeep'):
+                return 'jeep'
+            elif 'rover' in make_clean_symbols or 'jaguar' in make_clean_symbols:
+                return 'jaguar land rover'
+            elif make_clean_symbols.__eq__('mini'):
+                return 'bmw'
+            elif make_clean_symbols.__eq__('lexus'):
+                return 'toyota'
+            elif 'bedford' in make_clean_symbols:
+                return 'vauxhall'
+            elif 'lincoln' in make_clean_symbols:
+                return 'ford'
+            elif 'pontiac' in make_clean_symbols or 'general' in make_clean_symbols or 'gm ' in make_clean_symbols:
+                return 'general motors'
+
+            for main_make in self.main_makers:
+                if main_make in make_clean_symbols:
+                    return main_make
+        except Exception:
+            return make_clean_symbols
         return make_clean_symbols
 
     def build_main_makers(self, src, appearances):
@@ -130,4 +150,5 @@ class CarsDataCleaner:
                 print('error - bad line')
             except Exception:   # empty line - stop
                 break
+        print('main makers:', main_makers)
         return main_makers

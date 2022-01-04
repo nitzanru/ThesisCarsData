@@ -1,8 +1,8 @@
 import csv
 
 from CSVReader import CSVReader
- # makers= 8
-# cylinder capacity 12
+ # clean makers= 8
+# cylinder capacity 13
 class WriteColumnWithAppearancesToFile:
     """
     helper class to write to file all the column data and how many times each of them appears
