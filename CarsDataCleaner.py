@@ -1,10 +1,17 @@
 import csv
-
 import numpy as np
-import pandas as pd
-
 from BuildMakeModelMap import BuildMakeModelMap
 from CSVReader import CSVReader
+
+
+# remove all class types that aren't 4
+# read original file and write clean map of makers with appearances to temp file (without weird chars ./- and multiple spaces)
+# read temp file to create list of most common makers
+# replace makers to common and add to a new column in the original file
+
+# read edited file with clean makers and build map of make to its clean models with appearances to temp file (without weird chars ./- and multiple spaces)
+# read temp file to create list of most common makers and models
+# replace models to common and add to a new column
 
 class CarsDataCleaner:
     """
@@ -62,10 +69,10 @@ class CarsDataCleaner:
                         row = np.insert(row, 11, model_cleaned)
                         self.writer.writerow(row)
                     except Exception:
-                        print('error1 ' , row)
+                        print('error1 ', row)
                     # clean_chunk = self.add_nd_array_to_data_frame(clean_chunk, row)
             except Exception:
-                print('error2 ' , row)
+                print('error2 ', row)
         # clean_chunk.to_csv(self.dest, encoding='utf-8', index=False)
         print('wrote clean chunk')
 
@@ -75,23 +82,6 @@ class CarsDataCleaner:
             data_to_append[self.headers[i]] = nd_array[i]
         df = df.append(data_to_append, ignore_index=True)
         return df
-
-    def clean_symbols(self, make):
-        """
-        changes the make to be lower cased and cleans the symbols of the make - removes '-' ',' and spaces
-        returns the clean make
-        """
-        try:
-            parsed = make.lower()
-        except AttributeError:  # no maker (nan)
-            return make
-        parsed = parsed.replace('-', ' ')
-        parsed = parsed.replace(',', ' ')
-        parsed = parsed.replace(';', ' ')
-        parsed = parsed.replace('/', ' ')
-        parsed = parsed.replace('\\', ' ')
-        parsed = ' '.join(parsed.split())   # replace multiple spaces by one
-        return parsed
 
 
     def clean_model(self, model):
@@ -152,3 +142,18 @@ class CarsDataCleaner:
                 break
         print('main makers:', main_makers)
         return main_makers
+
+    @staticmethod
+    def write_mini_file(original_file, output_file):
+        """
+        given the original data write a mini file with only 1 chunk
+        """
+        reader = CSVReader(original_file)
+        gen = reader.read_chunks()
+        clean_file = open(output_file, newline='', mode='w', encoding='UTF-8')
+        writer = csv.writer(clean_file)
+        chunk = next(gen)
+        headers = chunk.columns
+        writer.writerow(headers)
+        for row in chunk.values:
+            writer.writerow(row)

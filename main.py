@@ -1,10 +1,12 @@
 from CarsDataCleaner import CarsDataCleaner
 from CarsDataCleanerHelper import CarsDataCleanerHelper
+from CarsMakesCleaner import CarsMakesCleaner
 from WriteColumnWithAppearancesToFile import WriteColumnWithAppearancesToFile
 from BuildMakeModelMap import BuildMakeModelMap
 
 if __name__ == '__main__':
     prefix = 'C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\'
+
     # helper = CarsDataCleanerHelper('C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record.csv', 'C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record_edited_makers.csv')
     # helper.clean()
 
@@ -14,8 +16,10 @@ if __name__ == '__main__':
     # helper.clean()
 
 # build clean make and clean model ()
-    cleaner = CarsDataCleaner(prefix + 'cars_last_record.csv', prefix + 'cars_last_record_clean_make_model_1.csv', prefix + 'makers1.csv')
-    cleaner.clean()
+#     cleaner = CarsDataCleaner(prefix + 'cars_last_record.csv', prefix + 'cars_last_record_clean_make_model_1.csv', prefix + 'makers1.csv')
+#     cleaner.clean()
+
+    CarsMakesCleaner(prefix + 'cars_last_record.csv', prefix + 'test\\makes_with_appearances.csv', prefix + 'test\\cars_clean_makes.csv')
 
     # cleaner = CarsDataCleaner(prefix + 'cars_last_record_test_class_5.csv', prefix + 'cars_last_record_clean_make_model_1.csv',
     #                           prefix + 'makers1.csv')
