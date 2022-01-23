@@ -1,32 +1,33 @@
 import csv
 import numpy as np
+
+from BuildMakeModelMap import BuildMakeModelMap
 from CSVReader import CSVReader
 from CarsDataCleaner import CarsDataCleaner
 from WriteType4MakesWithAppearancesToFile import WriteType4MakesWithAppearancesToFile
 
-# remove all class types that aren't 4
-# read original file and write clean map of makers with appearances to temp file (without weird chars ./- and multiple spaces)
-# read temp file to create list of most common makers
-# replace makers to common and add to a new column to the output file
+# read input file and write clean map of makers - models with appearances to temp file (without weird chars ./- and multiple spaces)
+# read temp file to create list of most common makers - models
+# replace models to common and add to a new column to the output file
 
 
-class CarsMakesCleaner:
+class CarsModelsCleaner:
     """
-    # cleans the data of the make column
-    # gets a src file as input (the original data), adds a column of the cleaned make and writes the result in the output file
-    # builds the list of main makers: makers that appear more than 2000 times (reads all makers and appearances from a file that it created in the previous step)
-    original_file - the original file of data
-    original_file_with_clean_makes - output file to write original data with new column of clean makes
-    makes_with_appearances_file - output file to write map of makers with appearances
+    # cleans the data of the model column
+    # gets a src file as input (the data with clean makes), adds a column of the cleaned model and writes the result in the output file
+    # builds the dictionary of makers and main models: models that appear more than 20 times (reads all makers and appearances from a file)
+    src - the original file of data
+    dst - output file to write original data with new column of clean makes
+    makers_file - output file to write map of makers with appearances
     """
 
-    ORIGINAL_MAKE_COLUMN = 8
-    CLEAN_MAKE_COLUMN = ORIGINAL_MAKE_COLUMN + 1
+    ORIGINAL_MODEL_COLUMN = 10   # column 10 because the input file already has an extra column of clean make
+    CLEAN_MODEL_COLUMN = ORIGINAL_MODEL_COLUMN + 1
 
-    def __init__(self, original_file, makes_with_appearances_file, original_file_with_clean_makes):
-        self.write_clean_makes_with_appearances(original_file, makes_with_appearances_file)
-        self.main_makers = self.load_main_makers(makes_with_appearances_file, 2000)     # the makers that appear more than 2000 times
-        self.add_final_clean_makes_to_file(original_file, original_file_with_clean_makes)
+    def __init__(self, input_file, makes_models_with_appearances_file, output_file):
+        self.write_clean_makes_models_with_appearances(input_file, makes_models_with_appearances_file)
+        self.main_makers_models = self.load_main_makers_models(makes_models_with_appearances_file, 20)     # the makers that appear more than 2000 times
+        self.add_final_clean_models_to_file(input_file, output_file)
 
     def add_final_clean_makes_to_file(self, original_file, output_file_with_clean_makes):
         """
@@ -42,16 +43,17 @@ class CarsMakesCleaner:
         self.write_headers()
         self.replace_makes_to_main_makes()
 
-    def write_clean_makes_with_appearances(self, original_file, makes_with_appearances_file):
+    def write_clean_makes_models_with_appearances(self, input_file, makes_models_with_appearances_file):
         """
         read original file and write clean map of makers with appearances to temp file
         (only type 4 rows and clean make - all lowered case and without weird chars ./- or multiple spaces)
 
-        :param original_file: the original data
-        :param makes_with_appearances_file: the output file to write clean map of makers with appearances
+        :param input_file: the data with clean makes
+        :param makes_models_with_appearances_file: the output file to write clean map of makers - models with appearances
         """
-        writer = WriteType4MakesWithAppearancesToFile(original_file)
-        writer.parse_column(makes_with_appearances_file, CarsMakesCleaner.ORIGINAL_MAKE_COLUMN)
+        builder = BuildMakeModelMap(input_file)
+        builder.build_main_models(20)
+        builder.write_to_file(makes_models_with_appearances_file)
 
     def write_headers(self):
         chunk = next(self.gen)
@@ -133,7 +135,7 @@ class CarsMakesCleaner:
         """
         builds a list of all makes that appear more than appearances times
         (the makes are assumed to be clean already)
-        :param makes_with_appearances_file: the file that contains all makes and appearances (created in the previous step)
+        :param makes_with_appearances_file: the file that contains all makes and appearances (created after parsing)
         :param min_appearances: the threshold
         :return: list of main makes
         """

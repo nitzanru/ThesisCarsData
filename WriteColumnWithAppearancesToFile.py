@@ -2,6 +2,7 @@ import csv
 from CarsDataCleaner import CarsDataCleaner
 from CSVReader import CSVReader
 # cylinder capacity 13
+from Tools import Tools
 
 
 class WriteColumnWithAppearancesToFile:
@@ -33,7 +34,7 @@ class WriteColumnWithAppearancesToFile:
         self.write_to_file(output_file, value_appearances)
 
     def clean_value(self, value):
-        return CarsDataCleaner.clean_symbols(value)
+        return Tools.clean_symbols(value)
 
     def write_to_file(self, file_name, dict_to_print):
         sorted_dict = dict(sorted(dict_to_print.items(), key=lambda item: item[1]))
@@ -42,22 +43,6 @@ class WriteColumnWithAppearancesToFile:
             for key, value in sorted_dict.items():
                 writer.writerow([key, value])
 
-    @staticmethod
-    def clean_symbols(make):
-        """
-        changes the make to be lower cased and cleans the symbols of the make - removes '-' ',' and spaces
-        returns the clean make
-        """
-        try:
-            parsed = make.lower()
-        except AttributeError:  # no maker (nan)
-            return make
-        parsed = parsed.replace('-', ' ')
-        parsed = parsed.replace(',', ' ')
-        parsed = parsed.replace(';', ' ')
-        parsed = parsed.replace('/', ' ')
-        parsed = parsed.replace('\\', ' ')
-        parsed = ' '.join(parsed.split())  # replace multiple spaces by one
-        return parsed
+
 
 

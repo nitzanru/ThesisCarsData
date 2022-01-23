@@ -1,40 +1,42 @@
 import csv
 
 from CSVReader import CSVReader
- # clean makers= 9
- # models= 10
- # clean models= 11
-# cylinder capacity 13
+from CarsMakesCleaner import CarsMakesCleaner
+from CarsModelsCleaner import CarsModelsCleaner
+from Tools import Tools
+
+
 class BuildMakeModelMap:
     """
     helper class that builds a map of makes and their main models
+    # need to clean the models - remove weird chars
     for example, the output will be {'honda':[['CV', 2000], ['FV', 1547]], 'suzuki':[['sx4',5471], ['swift',204]]}
+    :param input_file
     """
 
-    def __init__(self, src, column_key, column_values):
-        reader = CSVReader(src)
+    def __init__(self, input_file):
+        reader = CSVReader(input_file)
         self.gen = reader.read_chunks()
-        self.full_make_model_map = {}  # each key and list of lists (model and #apperences) = map of make to all models
-        self.make_model_map = {}    # map of make and main models only
-        #next(self.gen)  # header, don't parse
+        self.full_make_model_map = {}  # map make to models and #appearances
+        self.make_model_map = {}    # final map of make to main models only (no appearances)
         while True:
             try:
                 chunk = next(self.gen)
                 for row in chunk.values:
-                    make = row[column_key]
-                    model = self.clean_model(row[column_values])
+                    make = row[CarsMakesCleaner.CLEAN_MAKE_COLUMN]
+                    model = row[CarsModelsCleaner.ORIGINAL_MODEL_COLUMN]
+                    clean_model = Tools.clean_model(model)
                     if make in self.full_make_model_map.keys():   # make in map
                         found = False
-                        for pair in self.full_make_model_map[make]:
-                            if pair[0] == model:     # model in make's list
+                        for pair in self.full_make_model_map[make]:     # pair is a model and its number of appearances
+                            if pair[0] == clean_model:     # model in make's list - add appearance
                                 pair[1] += 1
                                 found = True
                                 break
-                        if not found:
-                            self.full_make_model_map[make].append([model, 1])
-                    else:
-                        self.full_make_model_map[make] = [[model, 1]]
-
+                        if not found:   # model not in make's list yet but make exists in map - add new [make-model]
+                            self.full_make_model_map[make].append([clean_model, 1])
+                    else:   # make not in map yet - add new [make-model]
+                        self.full_make_model_map[make] = [[clean_model, 1]]
             except UnicodeDecodeError:
                 print('error - bad line')
             except StopIteration:
@@ -43,38 +45,28 @@ class BuildMakeModelMap:
         # self.write_to_file(dest, make_model_map)
 
     def build_main_models(self, appearances):
-
-        for key, values in self.full_make_model_map.items():
-            models_list = []
-            for model_times_pair in values:
-                if model_times_pair[1] >= appearances:   # times is less than threshold
+        """
+        build map of makes and models that appear more than appearances
+        :param appearances: minimal number of times to appear
+        """
+        for make, values in self.full_make_model_map.items():
+            models_list = []    # main models
+            for model_times_pair in values:     # pairs of model & appearances
+                if model_times_pair[1] >= appearances:   # appears more than threshold
                     models_list.append(model_times_pair)
-            self.make_model_map[key] = models_list
+            self.make_model_map[make] = models_list
 
     def get_make_model_map(self):
         return self.make_model_map
 
-    def write_to_file(self, dest_file_name):
-        with open(dest_file_name, 'w', newline='', encoding='UTF-8') as csv_file:
+    def write_to_file(self, output_file):
+        """
+        write the dictionary of makes-models to the desired file
+        """
+        with open(output_file, 'w', newline='', encoding='UTF-8') as csv_file:
             writer = csv.writer(csv_file)
-            for make, values in self.make_model_map.items():
+            for make, models in self.make_model_map.items():
                 writer.writerow([make])
-                for model_times_pair in values:
-                    writer.writerow([model_times_pair[0], model_times_pair[1]])
+                for model in models:
+                    writer.writerow(model)
 
-    def clean_model(self, model):
-        """
-        changes the model to be lower cased and cleans the symbols - removes '-' ',' and spaces
-        returns the clean make
-        """
-        try:
-            parsed = model.lower()
-        except AttributeError:  # no maker (nan)
-            return model
-        parsed = parsed.replace('-', ' ')
-        parsed = parsed.replace(',', ' ')
-        parsed = parsed.replace(';', ' ')
-        parsed = parsed.replace('/', ' ')
-        parsed = parsed.replace('\\', ' ')
-        parsed = ' '.join(parsed.split())  # replace multiple spaces by one
-        return parsed
