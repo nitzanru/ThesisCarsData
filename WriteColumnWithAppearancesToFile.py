@@ -1,5 +1,4 @@
 import csv
-from CarsDataCleaner import CarsDataCleaner
 from CSVReader import CSVReader
 # cylinder capacity 13
 from Tools import Tools

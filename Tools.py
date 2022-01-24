@@ -1,5 +1,10 @@
 class Tools:
 
+    ORIGINAL_MAKE_COLUMN = 8
+    CLEAN_MAKE_COLUMN = ORIGINAL_MAKE_COLUMN + 1
+    ORIGINAL_MODEL_COLUMN = 10   # column 10 because the input file already has an extra column of clean make
+    CLEAN_MODEL_COLUMN = ORIGINAL_MODEL_COLUMN + 1
+
     @staticmethod
     def clean_make(make):
         """

@@ -2,7 +2,6 @@ import csv
 
 from CSVReader import CSVReader
 from CarsMakesCleaner import CarsMakesCleaner
-from CarsModelsCleaner import CarsModelsCleaner
 from Tools import Tools
 
 
@@ -17,26 +16,26 @@ class BuildMakeModelMap:
     def __init__(self, input_file):
         reader = CSVReader(input_file)
         self.gen = reader.read_chunks()
-        self.full_make_model_map = {}  # map make to models and #appearances
-        self.make_model_map = {}    # final map of make to main models only (no appearances)
+        self.full_make_models_map = {}  # map make to models and #appearances
+        self.make_models_map = {}    # final map of make to main models only (no appearances)
         while True:
             try:
                 chunk = next(self.gen)
                 for row in chunk.values:
-                    make = row[CarsMakesCleaner.CLEAN_MAKE_COLUMN]
-                    model = row[CarsModelsCleaner.ORIGINAL_MODEL_COLUMN]
+                    make = row[Tools.CLEAN_MAKE_COLUMN]
+                    model = row[Tools.ORIGINAL_MODEL_COLUMN]
                     clean_model = Tools.clean_model(model)
-                    if make in self.full_make_model_map.keys():   # make in map
+                    if make in self.full_make_models_map.keys():   # make in map
                         found = False
-                        for pair in self.full_make_model_map[make]:     # pair is a model and its number of appearances
+                        for pair in self.full_make_models_map[make]:     # pair is a model and its number of appearances
                             if pair[0] == clean_model:     # model in make's list - add appearance
                                 pair[1] += 1
                                 found = True
                                 break
                         if not found:   # model not in make's list yet but make exists in map - add new [make-model]
-                            self.full_make_model_map[make].append([clean_model, 1])
+                            self.full_make_models_map[make].append([clean_model, 1])
                     else:   # make not in map yet - add new [make-model]
-                        self.full_make_model_map[make] = [[clean_model, 1]]
+                        self.full_make_models_map[make] = [[clean_model, 1]]
             except UnicodeDecodeError:
                 print('error - bad line')
             except StopIteration:
@@ -49,15 +48,15 @@ class BuildMakeModelMap:
         build map of makes and models that appear more than appearances
         :param appearances: minimal number of times to appear
         """
-        for make, values in self.full_make_model_map.items():
+        for make, values in self.full_make_models_map.items():
             models_list = []    # main models
             for model_times_pair in values:     # pairs of model & appearances
                 if model_times_pair[1] >= appearances:   # appears more than threshold
-                    models_list.append(model_times_pair)
-            self.make_model_map[make] = models_list
+                    models_list.append(model_times_pair[0])
+            self.make_models_map[make] = models_list
 
-    def get_make_model_map(self):
-        return self.make_model_map
+    def get_make_models_map(self):
+        return self.make_models_map
 
     def write_to_file(self, output_file):
         """
@@ -65,8 +64,8 @@ class BuildMakeModelMap:
         """
         with open(output_file, 'w', newline='', encoding='UTF-8') as csv_file:
             writer = csv.writer(csv_file)
-            for make, models in self.make_model_map.items():
+            for make, models in self.make_models_map.items():
                 writer.writerow([make])
-                for model in models:
-                    writer.writerow(model)
+                # for model in models:
+                writer.writerow(models)
 

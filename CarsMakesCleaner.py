@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 from CSVReader import CSVReader
-from CarsDataCleaner import CarsDataCleaner
+from Tools import Tools
 from WriteType4MakesWithAppearancesToFile import WriteType4MakesWithAppearancesToFile
 
 # remove all class types that aren't 4
@@ -20,8 +20,7 @@ class CarsMakesCleaner:
     makes_with_appearances_file - output file to write map of makers with appearances
     """
 
-    ORIGINAL_MAKE_COLUMN = 8
-    CLEAN_MAKE_COLUMN = ORIGINAL_MAKE_COLUMN + 1
+
 
     def __init__(self, original_file, makes_with_appearances_file, original_file_with_clean_makes):
         self.write_clean_makes_with_appearances(original_file, makes_with_appearances_file)
@@ -51,12 +50,12 @@ class CarsMakesCleaner:
         :param makes_with_appearances_file: the output file to write clean map of makers with appearances
         """
         writer = WriteType4MakesWithAppearancesToFile(original_file)
-        writer.parse_column(makes_with_appearances_file, CarsMakesCleaner.ORIGINAL_MAKE_COLUMN)
+        writer.parse_column(makes_with_appearances_file, Tools.ORIGINAL_MAKE_COLUMN)
 
     def write_headers(self):
         chunk = next(self.gen)
         self.headers = chunk.columns
-        self.headers = np.insert(self.headers, CarsMakesCleaner.CLEAN_MAKE_COLUMN, 'clean make')   # index of clean make is 9
+        self.headers = np.insert(self.headers, Tools.CLEAN_MAKE_COLUMN, 'clean make')   # index of clean make is 9
         # self.headers = np.insert(self.headers, 11, 'clean model')   # index of clean model is 11
         self.writer.writerow(self.headers)
         self.replace_makes_to_main_makes_of_chunk(chunk)
@@ -79,14 +78,14 @@ class CarsMakesCleaner:
         # clean_chunk = pd.DataFrame(columns=self.headers)
         for row in chunk.values:
             try:
-                make = row[CarsMakesCleaner.ORIGINAL_MAKE_COLUMN]
+                make = row[Tools.ORIGINAL_MAKE_COLUMN]
                 try:
-                    make_cleaned = WriteType4MakesWithAppearancesToFile.clean_make(make)
+                    make_cleaned = Tools.clean_make(make)
                     for main_make in self.main_makers:
                         if main_make in make_cleaned:
                             make_cleaned = main_make
                             break
-                    row = np.insert(row, CarsMakesCleaner.CLEAN_MAKE_COLUMN, make_cleaned)
+                    row = np.insert(row, Tools.CLEAN_MAKE_COLUMN, make_cleaned)
                     self.writer.writerow(row)
                 except Exception:
                     print('error1 ', row)
@@ -125,9 +124,6 @@ class CarsMakesCleaner:
     # def clean_model(self, model):
     #     model_clean_symbols = self.clean_symbols(model)
     #     return model_clean_symbols
-
-
-
 
     def load_main_makers(self, makes_with_appearances_file, min_appearances):
         """
