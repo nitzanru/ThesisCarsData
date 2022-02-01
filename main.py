@@ -2,15 +2,15 @@ from CarsDataCleaner import CarsDataCleaner
 from CarsDataCleanerHelper import CarsDataCleanerHelper
 from CarsMakesCleaner import CarsMakesCleaner
 from CarsModelsCleaner import CarsModelsCleaner
+from DataAnalyzer import DataAnalyzer
 from WriteColumnWithAppearancesToFile import WriteColumnWithAppearancesToFile
 from BuildMakeModelMap import BuildMakeModelMap
 
 if __name__ == '__main__':
     prefix = 'C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\'
-
     #############   mini    ##############
-    #CarsMakesCleaner(prefix + 'cars_last_record_mini.csv', prefix + 'test\\mini_makes_with_appearances.csv', prefix + 'test\\mini_clean_makes.csv')
-    #CarsModelsCleaner(prefix + 'mini\\mini_clean_makes.csv', prefix + 'mini\\mini_clean_models.csv', prefix + 'mini\\mini_main_make_models.csv')
+    #CarsMakesCleaner(prefix + 'mini\\cars_last_record_mini.csv', prefix + 'mini\\mini_makes_with_appearances.csv', prefix + 'mini\\mini_clean_makes.csv', False)
+    #CarsModelsCleaner(prefix + 'mini\\mini_clean_makes.csv', prefix + 'mini\\mini_clean_models.csv', prefix + 'mini\\mini_main_make_models.csv', False)
 
     # helper = CarsDataCleanerHelper('C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record.csv', 'C:\\Users\\nrukhamin\\Desktop\\BGU\\thesis\\cars_last_record\\cars_last_record_edited_makers.csv')
     # helper.clean()
@@ -24,8 +24,12 @@ if __name__ == '__main__':
 #     cleaner = CarsDataCleaner(prefix + 'cars_last_record.csv', prefix + 'cars_last_record_clean_make_model_1.csv', prefix + 'makers1.csv')
 #     cleaner.clean()
 
-    #CarsMakesCleaner(prefix + 'cars_last_record.csv', prefix + 'test\\makes_with_appearances.csv', prefix + 'test\\cars_clean_makes.csv')
-    CarsModelsCleaner(prefix + 'test\\cars_clean_makes.csv', prefix + 'test\\cars_clean_models.csv', prefix + 'test\\cars_main_make_models.csv')
+    print('analyzing original data:')
+    analyzer = DataAnalyzer(prefix + 'cars_last_record.csv')
+    #CarsMakesCleaner(prefix + 'cars_last_record.csv', prefix + 'test\\makes_with_appearances_only_clean.csv', prefix + 'test\\cars_clean_makes_only_clean.csv', False)
+    CarsModelsCleaner(prefix + 'test\\cars_clean_makes_only_clean.csv', prefix + 'test\\cars_clean_models_only_clean.csv', prefix + 'test\\cars_main_make_models_only_clean.csv', False)
+    print('analyzing clean data:')
+    analyzer = DataAnalyzer(prefix + 'test\\cars_clean_models_only_clean.csv')
 
     # cleaner = CarsDataCleaner(prefix + 'cars_last_record_test_class_5.csv', prefix + 'cars_last_record_clean_make_model_1.csv',
     #                           prefix + 'makers1.csv')

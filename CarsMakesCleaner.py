@@ -8,7 +8,7 @@ from WriteType4MakesWithAppearancesToFile import WriteType4MakesWithAppearancesT
 # read original file and write clean map of makers with appearances to temp file (without weird chars ./- and multiple spaces)
 # read temp file to create list of most common makers
 # replace makers to common and add to a new column to the output file
-
+# removed triumph
 
 class CarsMakesCleaner:
     """
@@ -22,12 +22,12 @@ class CarsMakesCleaner:
 
 
 
-    def __init__(self, original_file, makes_with_appearances_file, original_file_with_clean_makes):
+    def __init__(self, original_file, makes_with_appearances_file, original_file_with_clean_makes, write_all_lines):
         self.write_clean_makes_with_appearances(original_file, makes_with_appearances_file)
         self.main_makers = self.load_main_makers(makes_with_appearances_file, 2000)     # the makers that appear more than 2000 times
-        self.add_final_clean_makes_to_file(original_file, original_file_with_clean_makes)
+        self.add_final_clean_makes_to_file(original_file, original_file_with_clean_makes, write_all_lines)
 
-    def add_final_clean_makes_to_file(self, original_file, output_file_with_clean_makes):
+    def add_final_clean_makes_to_file(self, original_file, output_file_with_clean_makes, write_all_lines):
         """
         given the original data and the list of most common makes - replace the makes to the main and add the result in a new column
         :param original_file: original data
@@ -38,8 +38,8 @@ class CarsMakesCleaner:
         self.clean_file = open(output_file_with_clean_makes, newline='', mode='w', encoding='UTF-8')
         self.writer = csv.writer(self.clean_file)
         # in order to write the headers, we must do this
-        self.write_headers()
-        self.replace_makes_to_main_makes()
+        self.write_headers(write_all_lines)
+        self.replace_makes_to_main_makes(write_all_lines)
 
     def write_clean_makes_with_appearances(self, original_file, makes_with_appearances_file):
         """
@@ -52,41 +52,48 @@ class CarsMakesCleaner:
         writer = WriteType4MakesWithAppearancesToFile(original_file)
         writer.parse_column(makes_with_appearances_file, Tools.ORIGINAL_MAKE_COLUMN)
 
-    def write_headers(self):
+    def write_headers(self, write_all_lines):
         chunk = next(self.gen)
         self.headers = chunk.columns
         self.headers = np.insert(self.headers, Tools.CLEAN_MAKE_COLUMN, 'clean make')   # index of clean make is 9
         # self.headers = np.insert(self.headers, 11, 'clean model')   # index of clean model is 11
         self.writer.writerow(self.headers)
-        self.replace_makes_to_main_makes_of_chunk(chunk)
+        self.replace_makes_to_main_makes_of_chunk(chunk, write_all_lines)
 
-    def replace_makes_to_main_makes(self):
+    def replace_makes_to_main_makes(self, write_all_lines):
         while True:
             try:
                 chunk = next(self.gen)
-                self.replace_makes_to_main_makes_of_chunk(chunk)
+                self.replace_makes_to_main_makes_of_chunk(chunk, write_all_lines)
             except UnicodeDecodeError:
                 print('error - bad line')
             except StopIteration:
                 break
         self.clean_file.close()
 
-    def replace_makes_to_main_makes_of_chunk(self, chunk):
+    def replace_makes_to_main_makes_of_chunk(self, chunk, write_all_lines):
         """
         goes line by line in the chunk, adds a column with the cleaned make and writes the new line in the destined file
         """
         # clean_chunk = pd.DataFrame(columns=self.headers)
         for row in chunk.values:
             try:
+                cleaned = False
                 make = row[Tools.ORIGINAL_MAKE_COLUMN]
                 try:
                     make_cleaned = Tools.clean_make(make)
                     for main_make in self.main_makers:
                         if main_make in make_cleaned:
                             make_cleaned = main_make
+                            cleaned = True
                             break
-                    row = np.insert(row, Tools.CLEAN_MAKE_COLUMN, make_cleaned)
-                    self.writer.writerow(row)
+                    if write_all_lines:    # if we need to write all lines (even not clean)
+                        row = np.insert(row, Tools.CLEAN_MAKE_COLUMN, make_cleaned)
+                        self.writer.writerow(row)
+                    else:    # if we need to write only clean lines (ignore not clean)
+                        if cleaned:     # if the line was cleaned
+                            row = np.insert(row, Tools.CLEAN_MAKE_COLUMN, make_cleaned)
+                            self.writer.writerow(row)
                 except Exception:
                     print('error1 ', row)
                     # clean_chunk = self.add_nd_array_to_data_frame(clean_chunk, row)

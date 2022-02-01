@@ -19,6 +19,11 @@ class WriteType4MakesWithAppearancesToFile(WriteColumnWithAppearancesToFile):
                 if test_class_id == 4:  # only if it's a private car
                     make = row[column]
                     cleaned_make = self.clean_value(make)
+                    try:
+                        if 'triumph' in cleaned_make or 'undefined' in cleaned_make:
+                            continue
+                    except Exception:
+                        continue
                     if cleaned_make in value_appearances.keys():
                         value_appearances[cleaned_make] = value_appearances[cleaned_make] + 1
                     else:
