@@ -35,8 +35,8 @@ class CarsDataCleaner:
     def write_headers(self):
         chunk = next(self.gen)
         self.headers = chunk.columns
-        self.headers = np.insert(self.headers, 9, 'clean make')   # index of clean make is 9
-        self.headers = np.insert(self.headers, 11, 'clean model')   # index of clean model is 11
+        self.headers = np.insert(self.headers, 9, 'clean_make')   # index of clean make is 9
+        self.headers = np.insert(self.headers, 11, 'clean_model')   # index of clean model is 11
         self.writer.writerow(self.headers)
         self.clean_chunk(chunk)
 

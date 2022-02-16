@@ -26,7 +26,7 @@ class BuildMakeModelMap:
                     model = row[Tools.ORIGINAL_MODEL_COLUMN]
                     clean_model = Tools.clean_model(model)
                     try:
-                        if 'undefined' in clean_model:
+                        if 'undefined' in clean_model or 'unclassified' in clean_model:
                             continue
                     except Exception:
                         continue

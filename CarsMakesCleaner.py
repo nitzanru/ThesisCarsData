@@ -20,8 +20,6 @@ class CarsMakesCleaner:
     makes_with_appearances_file - output file to write map of makers with appearances
     """
 
-
-
     def __init__(self, original_file, makes_with_appearances_file, original_file_with_clean_makes, write_all_lines):
         self.write_clean_makes_with_appearances(original_file, makes_with_appearances_file)
         self.main_makers = self.load_main_makers(makes_with_appearances_file, 2000)     # the makers that appear more than 2000 times
@@ -55,7 +53,7 @@ class CarsMakesCleaner:
     def write_headers(self, write_all_lines):
         chunk = next(self.gen)
         self.headers = chunk.columns
-        self.headers = np.insert(self.headers, Tools.CLEAN_MAKE_COLUMN, 'clean make')   # index of clean make is 9
+        self.headers = np.insert(self.headers, Tools.CLEAN_MAKE_COLUMN, 'clean_make')   # index of clean make is 9
         # self.headers = np.insert(self.headers, 11, 'clean model')   # index of clean model is 11
         self.writer.writerow(self.headers)
         self.replace_makes_to_main_makes_of_chunk(chunk, write_all_lines)

@@ -20,7 +20,7 @@ class WriteType4MakesWithAppearancesToFile(WriteColumnWithAppearancesToFile):
                     make = row[column]
                     cleaned_make = self.clean_value(make)
                     try:
-                        if 'triumph' in cleaned_make or 'undefined' in cleaned_make:
+                        if 'triumph' in cleaned_make or 'undefined' in cleaned_make or 'unclassified' in cleaned_make:
                             continue
                     except Exception:
                         continue

@@ -61,7 +61,7 @@ class CarsModelsCleaner:
     def write_headers(self, write_all_lines):
         chunk = next(self.gen)
         self.headers = chunk.columns
-        self.headers = np.insert(self.headers, Tools.CLEAN_MODEL_COLUMN, 'clean make')
+        self.headers = np.insert(self.headers, Tools.CLEAN_MODEL_COLUMN, 'clean_model')
         self.writer.writerow(self.headers)
         self.replace_models_to_main_models_of_chunk(chunk, write_all_lines)
 
