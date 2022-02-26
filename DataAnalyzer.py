@@ -10,6 +10,15 @@ class DataAnalyzer:
         df.clean_make.value_counts().plot(kind='bar')
         plt.show()
 
+
+        # one=df.loc[(df['clean_make'] == 'vauxhall') & (df['clean_model'] == 'cavalier')]
+        # two=df.loc[(df['clean_make'] == 'ford') & (df['clean_model'] == 'fiesta')]
+        # three=df.loc[(df['clean_make'] == 'renault') & (df['clean_model'] == 'master')]
+        # one =one.sort_values('vehicle_id')
+        # two =two.sort_values('vehicle_id')
+        # three =three.sort_values('vehicle_id')
+        # one =three
+
     def plot_tree_map(self, file):
         """plot a tree map graph of the clean makes"""
         df = pd.read_csv(file)
