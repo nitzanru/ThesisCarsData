@@ -2,32 +2,42 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import squarify as squarify
 
+
 class DataAnalyzer:
 
-    def plot_bars(self, file):
+    def plot_bars(self, df):
         """plot a bar graph of the clean makes"""
-        df = pd.read_csv(file)
-        df.clean_make.value_counts().plot(kind='bar')
+        # df["first_use_date.year"].value_counts().plot(kind='bar')
+        # plt.show()
+
+        df["test_date.year"].value_counts().plot(kind='bar')
         plt.show()
 
+    def plot_first_use_year_tree_map(self, df):
+        """plot a tree map graph of the first use year"""
+        series = df.loc[:, "first_use_date.year"].value_counts()
+        labels = series.axes[0]
+        dict = {'first_use_date.year': labels, 'sum': series.values}
+        data = pd.DataFrame(dict)
+        squarify.plot(label=data['first_use_date.year'], sizes=data['sum'], alpha=.8)
+        plt.show()
 
-        # one=df.loc[(df['clean_make'] == 'vauxhall') & (df['clean_model'] == 'cavalier')]
-        # two=df.loc[(df['clean_make'] == 'ford') & (df['clean_model'] == 'fiesta')]
-        # three=df.loc[(df['clean_make'] == 'renault') & (df['clean_model'] == 'master')]
-        # one =one.sort_values('vehicle_id')
-        # two =two.sort_values('vehicle_id')
-        # three =three.sort_values('vehicle_id')
-        # one =three
-
-    def plot_tree_map(self, file):
+    def plot_make_tree_map(self, df):
         """plot a tree map graph of the clean makes"""
-        df = pd.read_csv(file)
         series = df.loc[:, "clean_make"].value_counts()
-        labels = df.loc[:, "clean_make"].drop_duplicates().values
+        labels = series.axes[0]
         dict = {'clean_make': labels, 'sum': series.values}
         data = pd.DataFrame(dict)
-        squarify.plot(label=data['clean_make'], sizes =data['sum'], alpha=.8)
+        squarify.plot(label=data['clean_make'], sizes=data['sum'], alpha=.8)
         plt.show()
+
+    def describeDataFrame(self, df):
+        """write some statistics description of the given df"""
+        print("summary:")
+        df.info(verbose=True)
+        df.head()
+        print('group by clean make')
+        print(df.groupby('clean_make').count())
 
     def describe(self, file):
         """write some statistics descirption of the given file"""
@@ -75,5 +85,3 @@ class DataAnalyzer:
         # df.make.value_counts()
         # squarify.plot(sizes=d, label=a, alpha=.8)
         # plt.axis('off')
-
-

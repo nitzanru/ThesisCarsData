@@ -12,9 +12,6 @@ from Tools import Tools
 # replace models to common and add to a new column to the output file
 # removed unclassified model in all makes
 
-#todo vauxhall-opel matcher
-# peugeot remove speedfight/zenith/vivacity/looxor/elystar (scooter)
-
 class CarsModelsCleaner:
     """
     # cleans the data of the model column
